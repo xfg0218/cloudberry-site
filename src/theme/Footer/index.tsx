@@ -9,6 +9,7 @@ import SecuritySvg from "@site/static/img/security.svg";
 import TwitterSvg from "@site/static/img/twitter.svg";
 import WechatSvg from "@site/static/img/wechat.svg";
 import YoutubeSvg from "@site/static/img/youtube.svg";
+import DiscordSvg from "@site/static/img/discord.svg";
 import clsx from "clsx";
 import styles from "./styles.module.scss";
 
@@ -27,20 +28,7 @@ export default function Footer() {
     navToTarget(url, "_blank");
   };
 
-  const handleCheckLang = () => {
-    const langStr = "/zh";
-    // check lang
-    let href = location.href;
-    let pathname = location.pathname;
-    const hash = location.hash;
 
-    if (href.includes(langStr)) {
-      pathname = pathname.replace(langStr, "");
-      navToTarget(pathname + hash, "_self", true);
-    } else {
-      navToTarget(langStr + pathname + hash, "_self", true);
-    }
-  };
 
   const { siteConfig } = useDocusaurusContext();
   const footerConfig = siteConfig.themeConfig.footer;
@@ -101,6 +89,11 @@ export default function Footer() {
               className={styles.item}
               cursor="pointer"
               onClick={() => handleOpen(LINKS.community)}
+            />
+            <DiscordSvg
+              className={styles.item}
+              cursor="pointer"
+              onClick={() => handleOpen(LINKS.discord)}
             />
             <LinkedIn
               className={styles.item}

@@ -19,16 +19,9 @@ const config: Config = {
     'docusaurus-plugin-matomo',
     [
       "@easyops-cn/docusaurus-search-local",
-      { hashed: true, indexPages: true, language: ["en", "zh"] },
+      { hashed: true, indexPages: true, language: ["en"] },
     ],
   ],
-  // Even if you don't use internationalization, you can use this field to set
-  // useful metadata like html lang. For example, if your site is Chinese, you
-  // may want to replace "en" with "zh-Hans".
-  i18n: {
-    defaultLocale: "en",
-    locales: ["en", "zh"],
-  },
 
   presets: [
     [
@@ -91,14 +84,22 @@ const config: Config = {
       },
       items: [
         {
-          type: 'docsVersionDropdown',
-          versions: ['current', '2.x', '1.x'],
-        },
-        {
-          type: "docSidebar",
-          sidebarId: "docsbars",
           position: "right",
           label: "Docs",
+          items : [
+              {
+                label: "Next",
+                to: "docs/next",
+              },
+              {
+                label: "2.x (Current)",
+                to: "docs/",
+              },
+              {
+                label: "1.x",
+                to: "docs/1.x",
+              },
+            ],
         },
         {
           label: "Community",
@@ -111,6 +112,10 @@ const config: Config = {
             {
               label: "Slack Guide",
               to: "/community/slack",
+            },
+            {
+              label: "Discord Guide",
+              to: "/community/discord",
             },
             {
               label: "WeChat Guide",
@@ -181,6 +186,10 @@ const config: Config = {
             {
               label: "Inviting New Committers",
               to: "/team/new-committers",
+            },
+            {
+              label: "Inviting New PPMC Members",
+              to: "/team/new-ppmc-member",
             },
             {
               label: "Sign ICLA",
@@ -285,7 +294,11 @@ const config: Config = {
             },
             {
               label: "Slack",
-              href: "https://inviter.co/apache-cloudberry",
+              href: "https://join.slack.com/t/asf-cloudberry/shared_invite/zt-3um34r7hf-Sh~6jG6hVxlQJo1tbhK2sw",
+            },
+            {
+              label: "Discord",
+              href: "https://discord.gg/GJrz3Fxf6y",
             },
             {
               label: "Twitter",

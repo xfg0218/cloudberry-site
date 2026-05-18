@@ -30,19 +30,16 @@ The `configure` command sets up the build environment for Apache Cloudberry. Thi
 
 ```bash
 cd ~/cloudberry
-export LD_LIBRARY_PATH=/usr/local/cloudberry-db/lib:LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=/usr/local/cloudberry-db/lib:${LD_LIBRARY_PATH:-""}
 ./configure --prefix=/usr/local/cloudberry-db \
             --disable-external-fts \
-            --enable-debug \
-            --enable-cassert \
-            --enable-debug-extensions \
             --enable-gpcloud \
             --enable-ic-proxy \
             --enable-mapreduce \
             --enable-orafce \
             --enable-orca \
             --enable-pax \
-            --enable-pxf \
+            --disable-pxf \
             --enable-tap-tests \
             --with-gssapi \
             --with-ldap \
@@ -80,16 +77,13 @@ The `configure` command sets up the build environment for Apache Cloudberry. Thi
 cd ~/cloudberry
 ./configure --prefix=/usr/local/cloudberry-db \
             --disable-external-fts \
-            --enable-debug \
-            --enable-cassert \
-            --enable-debug-extensions \
             --enable-gpcloud \
             --enable-ic-proxy \
             --enable-mapreduce \
             --enable-orafce \
             --enable-orca \
             --enable-pax \
-            --enable-pxf \
+            --disable-pxf \
             --enable-tap-tests \
             --with-gssapi \
             --with-ldap \
@@ -123,7 +117,7 @@ Also, some packages names vary between different Linux distributions.
 |--|--|--|
 | `--prefix=PREFIX` |Installation directory. `/usr/local/cbdb` is the default value. `make install` will install all the files in `/usr/local/cbdb/bin`, `/usr/local/cbdb/lib` etc. | You can specify an installation prefix other than `/usr/local/cbdb` using `--prefix`. In this guide, we use `/usr/local/cloudberry-db` as the installation directory. |
 | `--disable-gpfdist` |      Do not use gpfdist | Enable gpfdist by default. This requires apr lib and libevent to be installed.|
-| `--disable-pxf`    |       Do not build PXF. | Enable PXF by default. |PXF is a query federation engine that accesses data residing in external systems such as Hadoop, Hive, HBase, relational databases, S3, Google Cloud Storage, among other external systems.|
+| `--disable-pxf`    |       Do not build PXF. | Enable PXF by default. PXF is a query federation engine that accesses data residing in external systems such as Hadoop, Hive, HBase, relational databases, S3, Google Cloud Storage, among other external systems. Now the [cloudberry-pxf](https://github.com/apache/cloudberry-pxf/tree/main/fdw) will be kept as the latest version of `pxf_fdw`.|
 | `--enable-orafce`  | Build with Oracle compatibility functions.  |   |
 | `--enable-debug`          | Build all programs and libraries with debugging symbols.| This means that you can run the programs in a debugger to analyze problems. This enlarges the size of the installed executables considerably, and on non-GCC compilers it usually also disables compiler optimization, causing slowdowns. However, having the symbols available is extremely helpful for dealing with any problems that might arise. Currently, this option is recommended for production installations only if you use GCC. But you should always have it on if you are doing development work or running a beta version.|
 |  `--enable-profiling`     | Build with profiling enabled.|This option is for use only with GCC and when doing development work.|
@@ -134,7 +128,7 @@ Also, some packages names vary between different Linux distributions.
 |  `--enable-gpcloud`       | Enable gpcloud support||
 |  `--enable-external-fts`  | Enable external fts support||
 |  `--enable-ic-proxy`      | Enable interconnect proxy mode | This requires libuv library to be installed. |
-|  `--enable-pax`          | Enable PAX support | gcc/gcc-c++ 8+, cmake3, protobuf and ZSTD are required, see details [here](https://github.com/apache/cloudberry/blob/main/contrib/pax_storage/doc/README.md#build). |
+|  `--enable-pax`          | Enable PAX support | gcc/gcc-c++ 8+, cmake3, protobuf, liburing and ZSTD are required, see details [here](https://github.com/apache/cloudberry/blob/main/contrib/pax_storage/doc/README.md#build). |
 |  `--with-includes=DIRS`   | Look for additional header files in DIRS|The Xerces-C is required to build with ORCA.|
 |  `--with-libraries=DIRS`  | Look for additional libraries in DIRS|The library xerces-c is required to build with ORCA|
 |  `--with-pgport=PORTNUM`  | Set default port number [5432]| `--with-pgport=5432` is used in this guide.|

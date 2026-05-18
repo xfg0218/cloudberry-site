@@ -1,5 +1,4 @@
 import LinkWithBaseUrl from "../components/common/LinkWithBaseUrl";
-import { isZhLangrage } from "../utils";
 
 let TIPS_CONTENT = (
   <LinkWithBaseUrl href="https://github.com/apache/cloudberry">
@@ -22,7 +21,13 @@ let SLACK_TWITTER_TWITTER_WECHAT = {
       title: "Slack",
       icon: "/img/home/links/slack.svg",
       desc: "Global channels for community members.",
-      link: "https://inviter.co/apache-cloudberry",
+      link: "https://join.slack.com/t/asf-cloudberry/shared_invite/zt-3um34r7hf-Sh~6jG6hVxlQJo1tbhK2sw",
+    },
+    {
+      title: "Discord",
+      icon: "/img/home/links/discord.svg",
+      desc: "Join our Discord server for real-time chat.",
+      link: "https://discord.gg/GJrz3Fxf6y",
     },
     {
       title: "LinkedIn",
@@ -59,7 +64,7 @@ let WANT_TO_CONTRIBUTE = {
         <span>
           There are many ways to contribute to Apache Cloudberry (Incubating), and you can easily find the ones that suit your skills and interests to 
           <LinkWithBaseUrl className={"light-active-color"} href="/contribute">
-            begin your contribution
+             begin your contribution 
           </LinkWithBaseUrl>
            journey.
         </span>
@@ -153,7 +158,8 @@ const LINKS = {
   github: "https://github.com/apache/cloudberry",
   twitter: "https://x.com/ASFCloudberry",
   youtube: "https://youtube.com/@ApacheCloudberry",
-  community: "https://inviter.co/apache-cloudberry",
+  community: "https://join.slack.com/t/asf-cloudberry/shared_invite/zt-3um34r7hf-Sh~6jG6hVxlQJo1tbhK2sw",
+  discord: "https://discord.gg/GJrz3Fxf6y",
   linkedIn: "https://www.linkedin.com/company/apache-cloudberry",
   wechat: "/community/wechat",
   discoverMore: "/docs",

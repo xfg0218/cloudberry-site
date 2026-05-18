@@ -10,7 +10,7 @@ In the following sections, we'll provide detailed, step-by-step instructions for
 By this, you will get an Apache Cloudberry environment with a demo cluster ready for testing and development.
 
 <Tabs>
-<TabItem value="rocky-linux" label="For Rocky Linux 8+" default>
+<TabItem value="rocky-linux" label="For Rocky Linux 8/9" default>
 ```bash
 
 # Install sudo & git
@@ -100,9 +100,9 @@ sudo dnf install -y apr-devel \
 
 # Enable additional development tools and libraries
 ## For Rocky Linux 8
-sudo dnf install -y --enablerepo=devel libuv-devel libyaml-devel perl-IPC-Run protobuf-devel
+sudo dnf install -y --enablerepo=devel liburing-devel libuv-devel libyaml-devel perl-IPC-Run protobuf-devel
 ## For Rocky Linux 9
-sudo dnf install -y --enablerepo=crb libuv-devel libyaml-devel perl-IPC-Run protobuf-devel
+sudo dnf install -y --enablerepo=crb liburing-devel libuv-devel libyaml-devel perl-IPC-Run protobuf-devel
 
 # Build Xerces-C source code
 XERCES_LATEST_RELEASE=3.3.0
@@ -137,19 +137,16 @@ sudo chown -R gpadmin:gpadmin /usr/local/cloudberry-db
 
 # Run configure
 cd ~/cloudberry
-export LD_LIBRARY_PATH=/usr/local/cloudberry-db/lib:LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=/usr/local/cloudberry-db/lib:${LD_LIBRARY_PATH:-""}
 ./configure --prefix=/usr/local/cloudberry-db \
             --disable-external-fts \
-            --enable-debug \
-            --enable-cassert \
-            --enable-debug-extensions \
             --enable-gpcloud \
             --enable-ic-proxy \
             --enable-mapreduce \
             --enable-orafce \
             --enable-orca \
             --enable-pax \
-            --enable-pxf \
+            --disable-pxf \
             --enable-tap-tests \
             --with-gssapi \
             --with-ldap \
@@ -184,7 +181,7 @@ psql -P pager=off template1 -c 'SELECT * from gp_segment_configuration'
 psql template1 -c 'SELECT version()'
 ```
 </TabItem>
-<TabItem value="ubuntu" label="For Ubuntu 20.04+">
+<TabItem value="ubuntu" label="For Ubuntu 20.04/22.04">
 
 ```bash
 
@@ -272,6 +269,19 @@ sudo apt install -y bison \
   python3-setuptools \
   rsync
 
+# For PAX build, you need to install liburing
+## For Ubuntu 22.04
+  sudo apt install -y liburing-dev
+## For Ubuntu 20.04
+  sudo apt install -y git build-essential
+  wget https://github.com/axboe/liburing/archive/refs/tags/liburing-2.1.tar.gz
+  tar -xzf liburing-2.1.tar.gz
+  rm "liburing-2.1.tar.gz"
+  cd liburing-liburing-2.1
+  make -j$(nproc)
+  sudo make install
+  sudo ldconfig
+
 # Use the gpadmin user from now on
 sudo su - gpadmin
 
@@ -290,16 +300,13 @@ sudo chown -R gpadmin:gpadmin /usr/local/cloudberry-db
 cd ~/cloudberry
 ./configure --prefix=/usr/local/cloudberry-db \
             --disable-external-fts \
-            --enable-debug \
-            --enable-cassert \
-            --enable-debug-extensions \
             --enable-gpcloud \
             --enable-ic-proxy \
             --enable-mapreduce \
             --enable-orafce \
             --enable-orca \
             --enable-pax \
-            --enable-pxf \
+            --disable-pxf \
             --enable-tap-tests \
             --with-gssapi \
             --with-ldap \

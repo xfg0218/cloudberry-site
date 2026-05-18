@@ -12,21 +12,27 @@ The backup metadata files contain all of the information that `gprestore` needs 
 
 ## Install the `gpbackup` and `gprestore` utilities
 
-Before installing the `gpbackup` and `gprestore` utilities, make sure that you have the [Golang](https://golang.org/doc/) (v1.11 or later) installed and that you have set the [Go `PATH` environment
-variable](https://go.dev/doc/install).
+Before installing the `gpbackup` and `gprestore` utilities, make sure that you have the [Golang](https://golang.org/doc/) (v1.21 or later) installed and that you have set the [Go `PATH` environment
+variable](https://go.dev/doc/install):
 
-1. Pull the `apache/cloudberry-gpbackup` GitHub repository to the target machine.
+  ```
+  ## Set the Go `PATH` environment variable
+  export GOPATH=$HOME/go
+  export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
+  ```
+
+1. Pull the `apache/cloudberry-backup` GitHub repository to the target machine.
 
     ```bash
-    go install github.com/apache/cloudberry-gpbackup@latest
+    go install github.com/apache/cloudberry-backup@latest
     ```
 
-    The repository is placed in `$GOPATH/pkg/mod/github.com/apache/cloudberry-gpbackup`.
+    The repository is placed in `$GOPATH/pkg/mod/github.com/apache/cloudberry-backup`.
 
-2. Enter the `apache/cloudberry-gpbackup` directory. Then, build and install the source code:
+2. Enter the `apache/cloudberry-backup` directory. Then, build and install the source code:
 
     ```bash
-    cd <$GOPATH/pkg/mod/github.com/apache/cloudberry-gpbackup>
+    cd <$GOPATH/pkg/mod/github.com/apache/cloudberry-backup>
     make depend
     make build
     ```
@@ -62,7 +68,7 @@ For example:
 $ gpbackup --dbname test_04
 
 20240108:17:17:18 gpbackup:gpadmin:cbdb-coordinator:001945-[INFO]:-gpbackup version = 1.2.7-beta1+dev.7
-20240108:17:17:18 gpbackup:gpadmin:cbdb-coordinator:001945-[INFO]:-Greenplum Database Version = oudberry Database 1.0.0 build 5551471267
+20240108:17:17:18 gpbackup:gpadmin:cbdb-coordinator:001945-[INFO]:-Apache Cloudberry Version = oudberry Database 1.0.0 build 5551471267
 20240108:17:17:18 gpbackup:gpadmin:cbdb-coordinator:001945-[INFO]:-Starting backup of database test_04
 20240108:17:17:18 gpbackup:gpadmin:cbdb-coordinator:001945-[INFO]:-Backup Timestamp = 20240108171718
 20240108:17:17:18 gpbackup:gpadmin:cbdb-coordinator:001945-[INFO]:-Backup Database = test_04
@@ -107,7 +113,7 @@ To consolidate all backup files into a single directory, include the `--backup-d
 $ gpbackup --dbname test_04 --backup-dir /home/gpadmin/backups
 
 20240108:17:34:10 gpbackup:gpadmin:cbdb-coordinator:003348-[INFO]:-gpbackup version = 1.2.7-beta1+dev.7
-20240108:17:34:10 gpbackup:gpadmin:cbdb-coordinator:003348-[INFO]:-Greenplum Database Version = oudberry Database 1.0.0 build 5551471267
+20240108:17:34:10 gpbackup:gpadmin:cbdb-coordinator:003348-[INFO]:-Apache Cloudberry Version = oudberry Database 1.0.0 build 5551471267
 ...
 20240108:17:34:12 gpbackup:gpadmin:cbdb-coordinator:003348-[INFO]:-Backup completed successfully
 
@@ -138,7 +144,7 @@ $ gprestore --timestamp 20240108171718 --create-db
 20240108:17:42:26 gprestore:gpadmin:cbdb-coordinator:004115-[INFO]:-Restore Key = 20240108171718
 20240108:17:42:26 gprestore:gpadmin:cbdb-coordinator:004115-[INFO]:-gpbackup version = 1.2.7-beta1+dev.7
 20240108:17:42:26 gprestore:gpadmin:cbdb-coordinator:004115-[INFO]:-gprestore version = 1.2.7-beta1+dev.7
-20240108:17:42:26 gprestore:gpadmin:cbdb-coordinator:004115-[INFO]:-Greenplum Database Version = oudberry Database 1.0.0 build 5551471267
+20240108:17:42:26 gprestore:gpadmin:cbdb-coordinator:004115-[INFO]:-Apache Cloudberry Version = oudberry Database 1.0.0 build 5551471267
 20240108:17:42:26 gprestore:gpadmin:cbdb-coordinator:004115-[INFO]:-Creating database
 20240108:17:42:26 gprestore:gpadmin:cbdb-coordinator:004115-[INFO]:-Database creation complete for: test_04
 20240108:17:42:26 gprestore:gpadmin:cbdb-coordinator:004115-[INFO]:-Restoring pre-data metadata
@@ -349,7 +355,7 @@ total 24
 The contents of the report files are similar. This is an example of the contents of a `gprestore` report file.
 
 ```
-Greenplum Database Restore Report
+Apache Cloudberry Restore Report
 
 timestamp key:           20240109111719
 gpdb version:            oudberry Database 1.0.0 build 5551471267
@@ -373,7 +379,7 @@ restore status:          Success
 
 To have `gpbackup` or `gprestore` send out status email notifications, you need place a file named `gp_email_contacts.yaml` in the home directory of the user running `gpbackup` or `gprestore` in the same directory as the utilities (`$GPHOME/bin`). A utility issues a message if it cannot locate a `gp_email_contacts.yaml` file in either location. If both locations contain a `.yaml` file, the utility uses the file in user `$HOME`.
 
-The email subject line includes the utility name, timestamp, job status (Success or Failure), and the name of the Greenplum Database host `gpbackup` or `gprestore` is called from. These are example subject lines for `gpbackup` emails.
+The email subject line includes the utility name, timestamp, job status (Success or Failure), and the name of the Apache Cloudberry host `gpbackup` or `gprestore` is called from. These are example subject lines for `gpbackup` emails.
 
 ```shell
 gpbackup 20180202133601 on gp-master completed: Success

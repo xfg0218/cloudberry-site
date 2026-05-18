@@ -2,6 +2,9 @@
 title: Geospatial Analytics
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 # Geospatial Analytics
 
 [PostGIS](https://postgis.net/) extends the capabilities of the PostgreSQL by adding support for storing, indexing, and querying geospatial data. Apache Cloudberry supports PostGIS for geospatial analytics.
@@ -10,115 +13,178 @@ This document introduces how to compile and build PostGIS for your Apache Cloudb
 
 You can access the PostGIS for Apache Cloudberry project repo at [`cloudberry-contrib/postgis`](https://github.com/cloudberry-contrib/postgis). The PostGIS code in this repo is dedicated to Apache Cloudberry. The compilation and building method introduced in this document is based on the code of this repo.
 
+:::note
+This repo is contributed by the community members and customized for Cloudberry, but please note that it is not maintained as one official Cloudberry project.
+:::
+
 ## Compile PostGIS for Apache Cloudberry
 
-Before installing PostGIS for Apache Cloudberry, install the required dependencies and compile several components. This process is currently supported only on CentOS, with plans to support Rocky Linux in the future.
+This document describes how to compile and build PostGIS 3.3.2 for Apache Cloudberry.
+
+Before installing PostGIS for Apache Cloudberry, install the required dependencies and compile several components. This process is tested and supported on Rocky Linux 8 & Rocky Linux 9.
 
 Before you get started, ensure that the Apache Cloudberry is correctly installed on your machine. If it is not installed, see the [documentation](https://cloudberry.apache.org/docs/) for installation instructions.
 
-1. Install the pre-requested dependencies.
+The following steps will be operated under the `gpadmin` user. Please make sure you are using the `gpadmin` user to operate the commands. If not, you can swithch to the `gpadmin` user by running the `su - gpadmin` command.
+
+### 1. Install the pre-requested dependencies via the package manager.
+
+    <Tabs>
+    <TabItem value="rocky-linux8" label="For Rocky Linux 8" default>
+    ```bash
+    sudo dnf install -y libxml2-devel json-c pkg-config gettext \
+        protobuf-c gmp-devel boost-devel automake libtool make \
+        gcc gcc-c++ sqlite-devel mpfr-devel bzip2 xz libcurl-devel \
+        cmake protobuf-c-devel libxslt docbook-style-xsl
+
+    sudo dnf install -y --enablerepo=devel protobuf-devel json-c-devel
+    sudo dnf install -y --enablerepo=devel CUnit-devel # Optional, for PostGIS testing
+    ```
+    </TabItem>
+    <TabItem value="rocky-linux9" label="Rocky Linux 9">
+    ```bash
+    sudo dnf install -y libxml2-devel json-c pkg-config gettext \
+        protobuf-c gmp-devel boost-devel automake libtool make \
+        gcc gcc-c++ sqlite-devel mpfr-devel bzip2 xz libcurl-devel \
+        cmake libxslt docbook-style-xsl
+
+    sudo dnf install -y --enablerepo=crb protobuf-c-devel json-c-devel
+    sudo dnf install -y --enablerepo=crb CUnit-devel # Optional, for PostGIS testing
+    ```
+    </TabItem>
+    </Tabs>
+
+### 2. Build the components (GDAL, CGAL, SFCGAL, and GEOS).
+
+Key dependencies include, which will be built from source:
+
+* proj: 5.2.0+
+* GEOS: 3.11+
+* gdal: 3+
+* cgal: 5.3+
+* sfcgal: 1.4.1+
+
+1. Build GDAL.
+
+    [GDAL](https://gdal.org/index.html) is a translator library for raster and vector geospatial data formats. 
+
+    We need to install [proj](https://proj.org/) first, which is a library for performing conversions between geospatial coordinates and is a dependency of GDAL. Follow the commands to install proj 6.0.0:
+
+      ```bash
+      wget https://download.osgeo.org/proj/proj-6.0.0.tar.gz
+      tar -xzf proj-6.0.0.tar.gz
+      cd proj-6.0.0
+      ./configure --prefix=/usr/local/proj6
+      make -j$(nproc) && sudo make -j$(nproc) install
+      ```
+
+    Then build GDAL 3.5.3:
+
+      ```bash
+      wget https://download.osgeo.org/gdal/3.5.3/gdal-3.5.3.tar.gz
+      tar xf gdal-3.5.3.tar.gz
+      cd gdal-3.5.3
+      ./configure --prefix=/usr/local/gdal-3.5.3 \
+        --with-proj=/usr/local/proj6
+      make -j$(nproc) && sudo make -j$(nproc) install
+      ```
+
+2. Build CGAL.
+
+    [CGAL](https://www.cgal.org/) provides easy access to efficient and reliable geometric algorithms in the form of a C++ library. Follow the commands to install it:
 
     ```bash
-    yum install -y libtool proj-devel boost-devel gmp-devel mpfr-devel pcre-devel protobuf protobuf-c protobuf-devel protobuf-c-devel && \
-    yum install -y gcc make subversion gcc-c++ sqlite-devel libxml2-devel swig expat-devel libcurl-devel python36-devel json-c
+    wget https://github.com/CGAL/cgal/releases/download/v5.6.1/CGAL-5.6.1.tar.xz
+    tar -xf CGAL-5.6.1.tar.xz
+    cd CGAL-5.6.1
+    mkdir build && cd build
+    cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local/cgal-5.6.1 ..
+    make -j$(nproc) && sudo make -j$(nproc) install
     ```
 
-2. Build the components (GDAL, CGAL, SFCGAL, and GEOS). Make sure you are building them by `root`.
+3. Build SFCGAL.
 
-    1. Build GDAL.
+    [SFCGAL](https://github.com/Oslandia/SFCGAL) is a C++ wrapper library around CGAL to support ISO 19107:2013 and OGC Simple Features Access 1.2 for 3D operations. Follow the commands to install it:
 
-        [GDAL](https://gdal.org/index.html) is a translator library for raster and vector geospatial data formats. Follow the commands to install it:
+    ```bash
+    wget https://gitlab.com/sfcgal/SFCGAL/-/archive/v1.4.1/SFCGAL-v1.4.1.tar.gz
+    tar xf SFCGAL-v1.4.1.tar.gz
+    cd SFCGAL-v1.4.1
+    mkdir build && cd build
+    cmake -DCMAKE_INSTALL_PREFIX=/usr/local/sfcgal-1.4.1 ..
+    make -j$(nproc) && sudo make -j$(nproc) install
+    ```
 
-        ```bash
-        wget https://download.osgeo.org/gdal/2.2.1/gdal-2.2.1.tar.gz --no-check-certificate
-        tar xf gdal-2.2.1.tar.gz
-        cd gdal-2.2.1/
-        ./configure --prefix=/usr/local/gdal-2.2.1
-        make && make install
-        ```
+4. Build GEOS.
 
-    2. Build CGAL.
+    [GEOS](https://libgeos.org/) is a C/C++ library for computational geometry with a focus on algorithms used in geographic information systems (GIS) software. Follow the commands to install it:
 
-        [CGAL](https://www.cgal.org/) provides easy access to efficient and reliable geometric algorithms in the form of a C++ library. Follow the commands to install it:
+    ```bash
+    wget https://download.osgeo.org/geos/geos-3.11.0.tar.bz2
+    tar xf geos-3.11.0.tar.bz2
+    cd geos-3.11.0
+    mkdir build && cd build
+    cmake -DCMAKE_INSTALL_PREFIX=/usr/local/geos-3.11.0 ..
+    make -j$(nproc) && sudo make -j$(nproc) install
+    ```
 
-        ```bash
-        wget https://github.com/CGAL/cgal/archive/releases/CGAL-4.13.tar.gz
-        tar xf CGAL-4.13.tar.gz
-        cd cgal-releases-CGAL-4.13/
-        mkdir build && cd build
-        cmake ..
-        make && make install
-        ```
+5. Update `/etc/ld.so.conf`.
 
-    3. Build SFCGAL.
+    After installing the above components, update `/etc/ld.so.conf` to configure the dynamic loader to search for their directories:
 
-        [SFCGAL](https://github.com/Oslandia/SFCGAL) is a C++ wrapper library around CGAL to support ISO 19107:2013 and OGC Simple Features Access 1.2 for 3D operations. Follow the commands to install it:
+    ```bash
+    sudo vi /etc/ld.so.conf
+    ```
 
-        ```bash
-        wget https://github.com/Oslandia/SFCGAL/archive/v1.3.6.tar.gz
-        tar xf v1.3.6.tar.gz
-        cd SFCGAL-1.3.6/
-        mkdir build && cd build
-        cmake -DCMAKE_INSTALL_PREFIX=/usr/local/sfcgal-1.3.6 ..
-        make && make install
-        ```
+    Add the following lines to the end of the file:
 
-    4. Build GEOS.
+    ```bash 
+    /usr/lib/
+    /usr/lib64/
+    /usr/local/sfcgal-1.4.1/lib64/
+    /usr/local/gdal-3.5.3/lib/
+    /usr/local/geos-3.11.0/lib64/
+    /usr/local/proj6/lib/
+    ```
 
-        [GEOS](https://libgeos.org/) is a C/C++ library for computational geometry with a focus on algorithms used in geographic information systems (GIS) software. Follow the commands to install it:
+    Then run the command to update the dynamic loader cache:
 
-        ```bash
-        wget https://download.osgeo.org/geos/geos-3.7.0.tar.bz2 --no-check-certificate
-        tar xf geos-3.7.0.tar.bz2
-        cd geos-3.7.0/
-        ./configure --prefix=/usr/local/geos-3.7.0/
-        make && make install
-        ```
+    ```bash
+    sudo ldconfig
+    ```
 
-    5. Update `/etc/ld.so.conf`.
+### 3. Build and install PostGIS.
 
-        After installing the above components, update `/etc/ld.so.conf` to configure the dynamic loader to search for their directories:
+1. Download the `cloudberry-contrib/postgis` repo to your `/home/gpadmin` directory:
 
-        ```bash
-        cat << EOF >> /etc/ld.so.conf
-        /usr/lib/
-        /usr/lib64/
-        /usr/local/sfcgal-1.3.6/lib64/
-        /usr/local/gdal-2.2.1/lib/
-        /usr/local/geos-3.7.0/lib/
-        EOF
-        ```
+     ```bash
+     git clone https://github.com/cloudberry-contrib/postgis.git /home/gpadmin/postgis
+     ```
 
-        Then run the command `ldconfig`.
+2. Compile PostGIS.
 
-3. Build and install PostGIS.
+     Before starting the compilation process, run the following commands to make sure the environment variables are set ready (in the gpdemo environment):
 
-    1. Download the `cloudberry-contrib/postgis` repo to your `/home/gpadmin` directory:
+     ```bash
+     source /usr/local/cloudberry-db/cloudberry-env.sh
+     source /home/gpadmin/cloudberry/gpAux/gpdemo/gpdemo-env.sh
+     ```
 
-        ```bash
-        git clone https://github.com/cloudberry-contrib/postgis.git /home/gpadmin/postgis
-        chown -R gpadmin:gpadmin /home/gpadmin/postgis
-        ```
+     Then continue:
 
-    2. Compile PostGIS.
-
-        Before starting the compilation process, run the following commands to make sure the environment variables are set ready:
-
-        ```bash
-        source /usr/local/cloudberry/greenplum_path.sh
-        source /home/gpadmin/cloudberry/gpAux/gpdemo/gpdemo-env.sh
-        scl enable devtoolset-10 bash
-        source /opt/rh/devtoolset-10/enable
-        ```
-
-        Then continue:
-
-        ```bash
-        cd /home/gpadmin/postgis/postgis/build/postgis-2.5.4/
-        ./autogen.sh
-        ./configure --prefix="${GPHOME}" --with-pgconfig="${GPHOME}"/bin/pg_config --with-raster --without-topology --with-gdalconfig=/usr/local/gdal-2.2.1/bin/gdal-config --with-sfcgal=/usr/local/sfcgal-1.3.6/bin/sfcgal-config --with-geosconfig=/usr/local/geos-3.7.0/bin/geos-config
-        make && make install
-        ```
+     ```bash
+     cd /home/gpadmin/postgis/postgis/build/postgis-3.3.2/
+     ./autogen.sh
+     ./configure --with-pgconfig="${GPHOME}"/bin/pg_config \
+       --with-raster --without-topology \
+       --with-gdalconfig=/usr/local/gdal-3.5.3/bin/gdal-config \
+       --with-sfcgal=/usr/local/sfcgal-1.4.1/bin/sfcgal-config \
+       --with-geosconfig=/usr/local/geos-3.11.0/bin/geos-config \
+       --with-projdir=/usr/local/proj6/
+     make -j$(nproc)
+     make check # Optional, to run PostGIS tests
+     sudo make -j$(nproc) install
+     ```
 
 ## Use PostGIS in Apache Cloudberry
 
@@ -129,6 +195,7 @@ $ psql -p 7000 postgres
 
 postgres=# CREATE EXTENSION postgis;     -- Enables PostGIS and raster
 postgres=# CREATE EXTENSION fuzzystrmatch;     -- Required for installing Tiger Geocoder
+postgres=# CREATE EXTENSION plpython3u; -- Required for installing Tiger Geocoder
 postgres=# CREATE EXTENSION postgis_tiger_geocoder;     -- Enables Tiger Geocoder
 postgres=# CREATE EXTENSION address_standardizer;     -- Enables address_standardizer
 postgres=# CREATE EXTENSION address_standardizer_data_us;
