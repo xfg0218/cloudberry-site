@@ -1,0 +1,10 @@
+[submodule "pxf"]
+	path = pxf
+	url = https://github.com/apache/cloudberry-pxf.git
+	sparse-checkout = docs/
+[submodule "core-internals"]
+	path = core-internals
+	url = https://github.com/apache/cloudberry.git
+	branch = main
+	shallow = true
+	sparse-checkout = doc/core-internals/

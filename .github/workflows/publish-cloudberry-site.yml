@@ -49,6 +49,12 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Submodules are left to the setup script below. One of them is the
+          # engine repository, checked out for a single docs directory; letting
+          # this step clone it would pull the whole tree before anything had a
+          # chance to narrow it.
+          submodules: false
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -56,7 +62,13 @@ jobs:
       # Install dependencies and build site
       - name: Install dependencies
         run: npm install
-        
+      
+      - name: Initialize submodules
+        run: |
+          echo "Initializing documentation submodules..."
+          chmod +x scripts/setup-doc-submodules.sh
+          ./scripts/setup-doc-submodules.sh
+
       - name: Build site
         run: |
           echo "🏗️ Building Docusaurus site..."

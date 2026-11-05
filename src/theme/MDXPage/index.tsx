@@ -1,32 +1,34 @@
-import { useLocation } from "@docusaurus/router";
 import {
   HtmlClassNameProvider,
   ThemeClassNames,
 } from "@docusaurus/theme-common";
-import useBaseUrl from "@docusaurus/useBaseUrl";
 import ColorCard from "@site/src/components/common/ColorCard";
-import ColorCardStyle from "@site/src/components/common/ColorCard/styles.module.scss";
 import CommonLayout from "@site/src/components/common/Layout";
 import MDXContent from "@theme/MDXContent";
 import type { Props } from "@theme/MDXPage";
 import TOC from "@theme/TOC";
-import Unlisted from "@theme/Unlisted";
+import ContentVisibility from "@theme/ContentVisibility";
+import MarkdownAlternate from "@site/src/components/common/markdownTwin";
 import clsx from "clsx";
 import styles from "./styles.module.css";
 
 export default function MDXPage(props: Props): JSX.Element {
   const { content: MDXPageContent } = props;
-  const location = useLocation();
-  const pathLen = location.pathname.split("/").filter((item) => {
-    return item != "";
-  }).length;
 
   const {
-    metadata: { frontMatter, unlisted, description, title },
+    metadata,
     assets,
   } = MDXPageContent;
+  const { frontMatter, description, title } = metadata;
   const { wrapperClassName, hide_table_of_contents: hideTableOfContents } =
     frontMatter;
+
+  const showTOC =
+    !hideTableOfContents && MDXPageContent.toc && MDXPageContent.toc.length > 0;
+
+  // `markdown-export` only twins `.md` pages -- an `.mdx` one would get a link
+  // to a file that was never written.
+  const hasMarkdownTwin = metadata.source?.endsWith(".md") ?? false;
 
   return (
     <HtmlClassNameProvider
@@ -36,32 +38,21 @@ export default function MDXPage(props: Props): JSX.Element {
       )}
     >
       <CommonLayout>
-        <ColorCard
-          className={clsx({
-            [ColorCardStyle.mdxCard]: pathLen == 2,
-          })}
-          subText={description}
-          titleText={title}
-          bgImage={
-            pathLen == 2 ? useBaseUrl("/img/mdx-page/header-bg.png") : ""
-          }
-        />
+        {hasMarkdownTwin && <MarkdownAlternate permalink={metadata.permalink} />}
+        <ColorCard subText={description} titleText={title} />
 
         <div className={styles.mdxPageWrapper}>
-          <div className={clsx("col", !hideTableOfContents && "col--8")}>
-            {unlisted && <Unlisted />}
-            <article>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <ContentVisibility metadata={metadata} />
+            <article className="markdown">
               <MDXContent>
                 <MDXPageContent />
               </MDXContent>
             </article>
           </div>
 
-          {!hideTableOfContents && MDXPageContent.toc.length > 0 && (
-            <div
-              className={clsx("col col--2", styles.rightContent)}
-              style={{ marginLeft: 50 }}
-            >
+          {showTOC && (
+            <div className={styles.rightContent} style={{ width: 220 }}>
               <TOC
                 toc={MDXPageContent.toc}
                 minHeadingLevel={frontMatter.toc_min_heading_level}

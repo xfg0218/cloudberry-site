@@ -1,4 +1,4 @@
-import { useBlogPost } from "@docusaurus/theme-common/internal";
+import { useBlogPost } from "@docusaurus/plugin-content-blog/client";
 import type { Props } from "@theme/BlogPostItem";
 
 import BlogPostItemContainer from "./Container";
@@ -9,6 +9,8 @@ import BlogItemDesc from "./components/Desc";
 import BlogItemTags from "./components/Tags";
 import BlogItemTitle from "./components/Title";
 
+import AiActions from "@site/src/components/common/AiActions";
+import MarkdownAlternate from "@site/src/components/common/markdownTwin";
 import LinkWithBaseUrl from "@site/src/components/common/LinkWithBaseUrl";
 import styles from "./styles.module.scss";
 
@@ -22,9 +24,9 @@ const BlogListItem = () => {
       <header className="link-wrap">
         <LinkWithBaseUrl to={permalink}>
           <BlogItemCover />
-          <div style={{ padding: "0 16px 10px" }}>
+          <div style={{ padding: "20px 22px 22px" }}>
             <div style={{ cursor: "pointer" }}>
-              <BlogItemTags style={{ marginTop: 6, marginBottom: 10 }} />
+              <BlogItemTags style={{ marginBottom: 12 }} />
               <BlogItemTitle />
               <BlogItemDesc style={{ marginTop: 10 }} />
             </div>
@@ -36,11 +38,21 @@ const BlogListItem = () => {
   );
 };
 const BlogDetailItem = ({ children }) => {
+  const {
+    metadata: { permalink },
+  } = useBlogPost();
+
   return (
     <BlogPostItemContainer className={styles["blogDetail"]}>
+      <MarkdownAlternate permalink={permalink} />
       <header>
         <BlogItemTitle />
         <BlogPostItemAuthors />
+        <AiActions
+          permalink={permalink}
+          align="start"
+          className={styles["blogAiActions"]}
+        />
       </header>
       {/* only show blog detail */}
       <BlogPostItemContent>{children}</BlogPostItemContent>
